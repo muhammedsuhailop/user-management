@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { RiAdminFill } from "react-icons/ri";
+import { useNavigate, Link } from "react-router-dom";
 
 const Signup = () => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -23,7 +25,17 @@ const Signup = () => {
       errors.email = "Enter a valid email address";
     }
 
-    if (!formData.password) errors.password = "Password is required";
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (
+      !/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(
+        formData.password
+      )
+    ) {
+      errors.password =
+        "Password must be at least 6 characters, include a letter, a number, and a special character";
+    }
+
     if (!formData["confirm-password"]) {
       errors["confirm-password"] = "Please confirm your password";
     } else if (formData.password !== formData["confirm-password"]) {
@@ -78,6 +90,7 @@ const Signup = () => {
 
       const data = JSON.parse(text);
       console.log("Signup success:", data);
+      navigate("/login");
     } catch (error) {
       setGeneralError("Something went wrong. Please try again.");
       console.error(error);
@@ -100,7 +113,7 @@ const Signup = () => {
         <div className="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 sm:p-8 md:space-y-6">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Create an account
+              Sign Up
             </h1>
 
             {generalError && (
@@ -235,12 +248,12 @@ const Signup = () => {
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account?{" "}
-                <a
-                  href="#"
+                <Link
+                  to="/login"
                   className="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Login here
-                </a>
+                </Link>
               </p>
             </form>
           </div>
