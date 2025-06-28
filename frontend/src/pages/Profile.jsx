@@ -1,7 +1,12 @@
 import React, { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginSuccess } from "../redux/user/userSlice";
+import {
+  loginSuccess,
+  updateUserFailure,
+  updateUserStart,
+  updateUserSuccess,
+} from "../redux/user/userSlice";
 
 function Profile() {
   const fileRef = useRef(null);
@@ -41,6 +46,7 @@ function Profile() {
 
     try {
       setUploading(true);
+
       const res = await fetch(
         "https://api.cloudinary.com/v1_1/dhwkouiqd/image/upload",
         {
@@ -52,17 +58,31 @@ function Profile() {
       const data = await res.json();
 
       if (data.secure_url) {
-        const updatedUser = {
-          ...currentUser,
-          profilePicture: data.secure_url,
-        };
+        dispatch(updateUserStart());
+
+        const backendRes = await fetch(`/api/user/update/${currentUser.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ profilePicture: data.secure_url }),
+        });
+
+        const updatedUser = await backendRes.json();
+
+        if (!backendRes.ok) {
+          throw new Error(updatedUser.message || "Failed to update user.");
+        }
+
+        dispatch(updateUserSuccess(updatedUser));
         dispatch(loginSuccess(updatedUser));
       } else {
         setFileError("Upload failed. Please try again.");
       }
     } catch (err) {
-      console.error("Upload failed:", err);
-      setFileError("Upload error. Please try again.");
+      console.error("Upload or update failed:", err);
+      setFileError("Something went wrong. Please try again.");
+      dispatch(updateUserFailure(err.message));
     } finally {
       setUploading(false);
     }
