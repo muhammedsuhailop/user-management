@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { RiAdminFill } from "react-icons/ri";
 import { useNavigate, Link } from "react-router-dom";
+import GoogleAuth from "../components/GoogleAuth";
 import {
   loginStart,
   loginFailure,
@@ -160,6 +161,8 @@ function Login() {
               >
                 {loading ? "Please wait..." : "Login"}
               </button>
+
+              <GoogleAuth />
 
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don't have an account?{" "}
