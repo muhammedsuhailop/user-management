@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import { RiAdminFill } from "react-icons/ri";
 import { useNavigate, Link } from "react-router-dom";
+import {
+  loginStart,
+  loginFailure,
+  loginSuccess,
+} from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 function Login() {
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [generalError, setGeneralError] = useState("");
+  const { loading, error } = useSelector((state) => state.user);
   const [fieldErrors, setFieldErrors] = useState({});
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
     setFieldErrors((prev) => ({ ...prev, [e.target.id]: "" }));
-    setGeneralError("");
+    dispatch(loginFailure(null));
   };
 
   const validateForm = () => {
@@ -30,14 +36,13 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    dispatch(loginStart());
     setFieldErrors({});
-    setGeneralError("");
 
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setLoading(false);
+      dispatch(loginFailure("Validation Error"));
       return;
     }
 
@@ -48,36 +53,24 @@ function Login() {
         body: JSON.stringify(formData),
       });
 
-      const text = await res.text();
+      const data = await res.json();
 
       if (!res.ok) {
-        try {
-          const errorData = JSON.parse(text);
-          if (res.status === 409 && errorData.message) {
-            if (errorData.message.includes("email")) {
-              setFieldErrors({ email: "Email already registered" });
-            } else if (errorData.message.includes("username")) {
-              setFieldErrors({ username: "Username already taken" });
-            } else {
-              setGeneralError(errorData.message);
-            }
-          } else {
-            setGeneralError(errorData.message || `Server error: ${res.status}`);
-          }
-        } catch (err) {
-          setGeneralError(`Server error: ${res.status}`);
+        dispatch(loginFailure(data.message || `Server error: ${res.status}`));
+
+        if (data.message?.includes("email")) {
+          setFieldErrors({ email: "Email not found" });
+        } else if (data.message?.includes("credentials")) {
+          setFieldErrors({ password: "Wrong password" });
         }
-        setLoading(false);
+
         return;
       }
 
-      console.log("Signup success:");
+      dispatch(loginSuccess(data));
       navigate("/");
     } catch (error) {
-      setGeneralError("Something went wrong. Please try again.");
-      console.error(error);
-    } finally {
-      setLoading(false);
+      dispatch(loginFailure("Network error. Please try again."));
     }
   };
 
@@ -98,10 +91,8 @@ function Login() {
               Login
             </h1>
 
-            {generalError && (
-              <div className="text-red-600 text-sm font-medium">
-                {generalError}
-              </div>
+            {error && (
+              <div className="text-red-600 text-sm font-medium">{error}</div>
             )}
 
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
