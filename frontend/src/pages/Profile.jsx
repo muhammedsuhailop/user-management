@@ -6,6 +6,7 @@ import {
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
+  logout as logoutAction,
 } from "../redux/user/userSlice";
 
 function Profile() {
@@ -16,9 +17,17 @@ function Profile() {
   const [uploading, setUploading] = useState(false);
   const [fileError, setFileError] = useState("");
 
-  const handleLogout = () => {
-    dispatch(loginSuccess(null));
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      dispatch(logoutAction());
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
   };
 
   const handleChangePicture = async (event) => {

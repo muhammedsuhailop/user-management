@@ -9,20 +9,20 @@ export const test = (req, res) => {
 
 export const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id) {
-    return next(errorHandler(401, 'You can update only your account'));
+    return next(errorHandler(401, "You can update only your account"));
   }
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
-        $set: req.body, 
+        $set: req.body,
       },
-      { new: true } 
+      { new: true }
     );
 
     if (!updatedUser) {
-      return next(errorHandler(404, 'User not found'));
+      return next(errorHandler(404, "User not found"));
     }
 
     const { password, ...rest } = updatedUser._doc;
@@ -30,4 +30,11 @@ export const updateUser = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const logout = (req, res, next) => {
+  res
+    .clearCookie("access_token")
+    .status(200)
+    .json({ message: "Logout successful" });
 };
