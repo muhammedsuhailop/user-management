@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import { errorHandler } from "../utils/error.js";
 
 export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -9,6 +10,12 @@ export const signup = async (req, res, next) => {
     await newUser.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    next(err);
+    // Duplicate Key
+    if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      const message = `${duplicateField} already exists`;
+      return next(errorHandler(409, message));
+    }
+    next(error);
   }
 };

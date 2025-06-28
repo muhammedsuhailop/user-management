@@ -1,90 +1,252 @@
-import React from "react";
+import React, { useState } from "react";
+import { RiAdminFill } from "react-icons/ri";
 
 const Signup = () => {
+  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFieldErrors((prev) => ({ ...prev, [e.target.id]: "" }));
+    setGeneralError("");
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.username?.trim()) errors.username = "Username is required";
+    if (!formData.email?.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Enter a valid email address";
+    }
+
+    if (!formData.password) errors.password = "Password is required";
+    if (!formData["confirm-password"]) {
+      errors["confirm-password"] = "Please confirm your password";
+    } else if (formData.password !== formData["confirm-password"]) {
+      errors["confirm-password"] = "Passwords do not match";
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setFieldErrors({});
+    setGeneralError("");
+
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const text = await res.text();
+
+      if (!res.ok) {
+        try {
+          const errorData = JSON.parse(text);
+          if (res.status === 409 && errorData.message) {
+            if (errorData.message.includes("email")) {
+              setFieldErrors({ email: "Email already registered" });
+            } else if (errorData.message.includes("username")) {
+              setFieldErrors({ username: "Username already taken" });
+            } else {
+              setGeneralError(errorData.message);
+            }
+          } else {
+            setGeneralError(errorData.message || `Server error: ${res.status}`);
+          }
+        } catch (err) {
+          setGeneralError(`Server error: ${res.status}`);
+        }
+        setLoading(false);
+        return;
+      }
+
+      const data = JSON.parse(text);
+      console.log("Signup success:", data);
+    } catch (error) {
+      setGeneralError("Something went wrong. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          className="mx-auto h-10 w-auto"
-          src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          alt="Your Company"
-        />
-        <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-gray-900">
-          Sign in to your account
-        </h2>
-      </div>
+    <section className="bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <a
+          href="#"
+          className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white"
+        >
+          <RiAdminFill />
+          User- Management App
+        </a>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" action="#" method="POST">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Email address
-            </label>
-            <div className="mt-2">
-              <input
-                type="email"
-                name="email"
-                id="email"
-                autoComplete="email"
-                required
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600"
-              />
-            </div>
-          </div>
+        <div className="w-full bg-white rounded-lg shadow dark:border sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+          <div className="p-6 space-y-4 sm:p-8 md:space-y-6">
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+              Create an account
+            </h1>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-900"
+            {generalError && (
+              <div className="text-red-600 text-sm font-medium">
+                {generalError}
+              </div>
+            )}
+
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+              {/* Username */}
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  User name
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  className={`bg-gray-50 border ${
+                    fieldErrors.username ? "border-red-500" : "border-gray-300"
+                  } text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 ${
+                    fieldErrors.username
+                      ? "dark:border-red-500"
+                      : "dark:border-gray-600"
+                  } dark:placeholder-gray-400 dark:text-white`}
+                  placeholder="Enter User Name"
+                  onChange={handleChange}
+                />
+                {fieldErrors.username && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.username}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className={`bg-gray-50 border ${
+                    fieldErrors.email ? "border-red-500" : "border-gray-300"
+                  } text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 ${
+                    fieldErrors.email
+                      ? "dark:border-red-500"
+                      : "dark:border-gray-600"
+                  } dark:placeholder-gray-400 dark:text-white`}
+                  placeholder="Enter your Email"
+                  onChange={handleChange}
+                />
+                {fieldErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Password */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  className={`bg-gray-50 border ${
+                    fieldErrors.password ? "border-red-500" : "border-gray-300"
+                  } text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 ${
+                    fieldErrors.password
+                      ? "dark:border-red-500"
+                      : "dark:border-gray-600"
+                  } dark:placeholder-gray-400 dark:text-white`}
+                  placeholder="Enter your password"
+                  onChange={handleChange}
+                />
+                {fieldErrors.password && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.password}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label
+                  htmlFor="confirm-password"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  id="confirm-password"
+                  className={`bg-gray-50 border ${
+                    fieldErrors["confirm-password"]
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 ${
+                    fieldErrors["confirm-password"]
+                      ? "dark:border-red-500"
+                      : "dark:border-gray-600"
+                  } dark:placeholder-gray-400 dark:text-white`}
+                  placeholder="Confirm your password"
+                  onChange={handleChange}
+                />
+                {fieldErrors["confirm-password"] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors["confirm-password"]}
+                  </p>
+                )}
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
               >
-                Password
-              </label>
-              <div className="text-sm">
+                {loading ? "Please wait..." : "Create an account"}
+              </button>
+
+              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                Already have an account?{" "}
                 <a
                   href="#"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
-                  Forgot password?
+                  Login here
                 </a>
-              </div>
-            </div>
-            <div className="mt-2">
-              <input
-                type="password"
-                name="password"
-                id="password"
-                autoComplete="current-password"
-                required
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-indigo-600"
-              />
-            </div>
+              </p>
+            </form>
           </div>
-
-          <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
-
-        <p className="mt-10 text-center text-sm text-gray-500">
-          Not a member?{" "}
-          <a
-            href="#"
-            className="font-semibold text-indigo-600 hover:text-indigo-500"
-          >
-            Start a 14 day free trial
-          </a>
-        </p>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
