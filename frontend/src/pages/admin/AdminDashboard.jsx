@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import UserFormModal from "../../components/UserFormModal";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import Footer from "../../components/Footer";
 
 function AdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -155,6 +156,7 @@ function AdminDashboard() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
@@ -352,6 +354,8 @@ function AdminDashboard() {
         isLoading={deleteLoading}
       />
     </div>
+    <Footer/>
+    </>
   );
 }
 
