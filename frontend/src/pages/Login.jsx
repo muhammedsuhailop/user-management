@@ -69,7 +69,11 @@ function Login() {
       }
 
       dispatch(loginSuccess(data));
-      navigate("/");
+      if (data.isAdmin) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       dispatch(loginFailure("Network error. Please try again."));
     }

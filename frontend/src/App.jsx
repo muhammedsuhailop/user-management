@@ -5,18 +5,28 @@ import Profile from "./pages/Profile";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
+      <Navbar /> 
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
         <Route element={<PrivateRoute />}>
+          <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          
+          {/* <Route path="/admin/users" element={<UserManagement />} /> */}
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );

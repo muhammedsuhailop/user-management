@@ -28,7 +28,10 @@ export const login = async (req, res, next) => {
     if (!validUser) return next(errorHandler(404, "User not found"));
     const validPassword = bcryptjs.compareSync(password, validUser.password);
     if (!validPassword) return next(errorHandler(401, "Wrong Credentials"));
-    const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { id: validUser._id, isAdmin: validUser.isAdmin },
+      process.env.JWT_SECRET
+    );
     res
       .cookie("access_token", token, { httpOnly: true, maxAge: 60 * 60 * 1000 })
       .status(200)
@@ -37,6 +40,7 @@ export const login = async (req, res, next) => {
         username: validUser.username,
         email: validUser.email,
         profilePicture: validUser.profilePicture,
+        isAdmin: validUser.isAdmin,
         message: "Login successful",
       });
   } catch (error) {
@@ -72,9 +76,13 @@ export const google = async (req, res, next) => {
 
       const savedUser = await newUser.save();
 
-      const token = jwt.sign({ id: savedUser._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
+      const token = jwt.sign(
+        { id: savedUser._id, isAdmin: savedUser.isAdmin },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
 
       const { password, ...rest } = savedUser._doc;
 
