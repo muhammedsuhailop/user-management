@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import UserFormModal from "../../components/UserFormModal";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import Footer from "../../components/Footer";
+import { FaRegEdit } from "react-icons/fa";
+import { MdDeleteForever } from "react-icons/md";
 
 function AdminDashboard() {
   const { currentUser } = useSelector((state) => state.user);
@@ -157,204 +159,220 @@ function AdminDashboard() {
 
   return (
     <>
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Admin Dashboard - User Management
-        </h1>
+      <div className="min-h-screen bg-gray-100 p-6">
+        <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+            Admin Dashboard
+          </h1>
 
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <input
-            type="text"
-            placeholder="Search by username or email..."
-            className="w-full md:w-2/3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          <button
-            onClick={handleCreateNewUser}
-            className="w-full md:w-auto bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-          >
-            Add New User
-          </button>
-        </div>
-
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-gray-700">
-            Total Users: <span className="font-semibold">{totalUsers}</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <label htmlFor="itemsPerPage" className="text-gray-700">
-              Items per page:
-            </label>
-            <select
-              id="itemsPerPage"
-              value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-              className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-        </div>
-
-        {deleteLoading && (
-          <p className="text-center text-blue-600 text-lg mt-4">
-            Deleting user...
-          </p>
-        )}
-        {deleteError && (
-          <p className="text-center text-red-600 text-lg mt-4">
-            Delete Error: {deleteError}
-          </p>
-        )}
-        {deleteSuccess && (
-          <p className="text-center text-green-600 text-lg mt-4">
-            {deleteSuccess}
-          </p>
-        )}
-
-        {listLoading && (
-          <p className="text-center text-blue-600 text-lg">Loading users...</p>
-        )}
-        {listError && (
-          <p className="text-center text-red-600 text-lg">
-            Error fetching users: {listError}
-          </p>
-        )}
-
-        {!listLoading && (
-          <div className="overflow-x-auto">
-            {users.length === 0 && searchTerm === "" ? (
-              <p className="text-center text-gray-600 text-lg mt-8">
-                No users found.
-              </p>
-            ) : users.length === 0 && searchTerm !== "" ? (
-              <p className="text-center text-gray-600 text-lg mt-8">
-                No users found matching "{searchTerm}".
-              </p>
-            ) : (
-              <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
-                      ID
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
-                      Username
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
-                      Email
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
-                      Admin
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr
-                      key={user._id}
-                      className="border-b border-gray-200 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 text-sm text-gray-700 truncate max-w-[100px]">
-                        {user._id}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        {user.username}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        {user.email}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        {user.isAdmin ? (
-                          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            Yes
-                          </span>
-                        ) : (
-                          <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            No
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 mr-2 transition duration-200"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => confirmDelete(user)}
-                          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        )}
-
-        {!listLoading && !listError && totalPages > 1 && (
-          <div className="flex justify-center items-center mt-6 space-x-2">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <input
+              type="text"
+              placeholder="Search by username or email..."
+              className="w-full md:w-2/3 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
             <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
+              onClick={handleCreateNewUser}
+              className="w-full md:w-auto bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             >
-              Previous
+              Add New User
             </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                disabled={false}
-                className={`px-4 py-2 rounded-md ${
-                  currentPage === index + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
-                }`}
+          </div>
+
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-gray-700">
+              Total Users: <span className="font-semibold">{totalUsers}</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <label htmlFor="itemsPerPage" className="text-gray-700">
+                Items per page:
+              </label>
+              <select
+                id="itemsPerPage"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-              Next
-            </button>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
           </div>
+
+          {deleteLoading && (
+            <p className="text-center text-blue-600 text-lg mt-4">
+              Deleting user...
+            </p>
+          )}
+          {deleteError && (
+            <p className="text-center text-red-600 text-lg mt-4">
+              Delete Error: {deleteError}
+            </p>
+          )}
+          {deleteSuccess && (
+            <p className="text-center text-green-600 text-lg mt-4">
+              {deleteSuccess}
+            </p>
+          )}
+
+          {listLoading && (
+            <p className="text-center text-blue-600 text-lg">
+              Loading users...
+            </p>
+          )}
+          {listError && (
+            <p className="text-center text-red-600 text-lg">
+              Error fetching users: {listError}
+            </p>
+          )}
+
+          {!listLoading && (
+            <div className="overflow-x-auto">
+              {users.length === 0 && searchTerm === "" ? (
+                <p className="text-center text-gray-600 text-lg mt-8">
+                  No users found.
+                </p>
+              ) : users.length === 0 && searchTerm !== "" ? (
+                <p className="text-center text-gray-600 text-lg mt-8">
+                  No users found matching "{searchTerm}".
+                </p>
+              ) : (
+                <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                        ID
+                      </th>
+                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                        Username
+                      </th>
+                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                        Email
+                      </th>
+                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                        Admin
+                      </th>
+                      <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user) => (
+                      <tr
+                        key={user._id}
+                        className="border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="py-3 px-4 text-sm text-gray-700 truncate max-w-[100px]">
+                          {user._id}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {user.username}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {user.email}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          {user.isAdmin ? (
+                            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              Yes
+                            </span>
+                          ) : (
+                            <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              No
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => handleEdit(user)}
+                              className="flex items-center bg-yellow-500 text-white px-3 py-2 rounded-md hover:bg-yellow-600 transition duration-200"
+                            >
+                              <span className="md:hidden">
+                                <FaRegEdit />
+                              </span>
+                              <span className="hidden md:inline-flex items-center gap-1">
+                                <FaRegEdit />
+                                <span>Edit</span>
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => confirmDelete(user)}
+                              className="flex items-center bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition duration-200"
+                            >
+                              <span className="md:hidden">
+                                <MdDeleteForever />
+                              </span>
+                              <span className="hidden md:inline-flex items-center gap-1">
+                                <MdDeleteForever />
+                                <span>Delete</span>
+                              </span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+
+          {!listLoading && !listError && totalPages > 1 && (
+            <div className="flex justify-center items-center mt-6 space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
+              >
+                Previous
+              </button>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageChange(index + 1)}
+                  disabled={false}
+                  className={`px-4 py-2 rounded-md ${
+                    currentPage === index + 1
+                      ? "bg-primary-600 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-300"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-100 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+
+        {isModalOpen && (
+          <UserFormModal
+            user={editingUser}
+            onClose={handleModalCloseAndRefresh}
+          />
         )}
-      </div>
 
-      {isModalOpen && (
-        <UserFormModal
-          user={editingUser}
-          onClose={handleModalCloseAndRefresh}
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          userToDelete={userToDelete}
+          onConfirm={executeDelete}
+          onCancel={cancelDelete}
+          isLoading={deleteLoading}
         />
-      )}
-
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        userToDelete={userToDelete}
-        onConfirm={executeDelete}
-        onCancel={cancelDelete}
-        isLoading={deleteLoading}
-      />
-    </div>
-    <Footer/>
+      </div>
+      <Footer />
     </>
   );
 }

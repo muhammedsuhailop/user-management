@@ -12,9 +12,12 @@ const Home = () => {
         <div className="w-[70%] h-[60%] md:h-[80vh] bg-white p-8 rounded-lg shadow-md">
           {currentUser ? (
             <>
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              <h1 className="text-4xl font-bold text-primary-800 mb-4">
                 Welcome,{" "}
-                <span className="text-blue-600">{currentUser.username}</span>!
+                <span className="text-primary-500 ">
+                  {currentUser.username}
+                </span>
+                !
               </h1>
               <p className="text-lg text-gray-600">
                 You are now on the home page.

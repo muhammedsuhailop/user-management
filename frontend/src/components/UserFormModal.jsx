@@ -293,7 +293,7 @@ function UserFormModal({ user, onClose }) {
             </button>
             <button
               type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+              className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               disabled={loading}
             >
               {loading
